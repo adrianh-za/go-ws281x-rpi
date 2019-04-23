@@ -11,7 +11,7 @@ import (
 const (
 	ledBrightness int = 128
 	ledChannel    int = 0
-	ledRows       int = 4
+	ledRows       int = 8
 	ledCols       int = 8
 )
 
