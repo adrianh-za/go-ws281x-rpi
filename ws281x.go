@@ -88,11 +88,18 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 		} else {
 			ws2811.dev.channel[i].invert = C.int(0)
 		}
+
+		//Must a gamma correction be used
 		if cOpt.Gamma != nil {
 			// allocate and copy gamma table. The memory will be freed by C.ws2811_fini().
 			m := (*C.uint8_t)(C.malloc(C.size_t(256)))
 			ws2811.dev.channel[i].gamma = m
 			C.memcpy(unsafe.Pointer(m), unsafe.Pointer(&cOpt.Gamma[0]), C.size_t(256)) // nolint: gas
+		}
+
+		//Must the exit be captured and handled, and must the matrix be cleared
+		if cOpt.CaptureExit {
+			ws2811.SetupExit(i, cOpt.LedCount, cOpt.ClearOnExit)
 		}
 	}
 	return ws2811, err
@@ -126,7 +133,7 @@ func (ws2811 *WS2811) Init() error {
 func (ws2811 *WS2811) Render() error {
 	res := int(C.ws2811_render(ws2811.dev))
 	if res != 0 {
-		return fmt.Errorf("error ws2811.render: %d (%v)", res, StatusDesc(res))
+		return fmt.Errorf("WS281x: error ws2811.render: %d (%v)", res, StatusDesc(res))
 	}
 	return nil
 }
@@ -138,7 +145,7 @@ func (ws2811 *WS2811) Render() error {
 func (ws2811 *WS2811) Wait() error {
 	res := int(C.ws2811_wait(ws2811.dev))
 	if res != 0 {
-		return fmt.Errorf("error ws2811.wait: %d (%v)", res, StatusDesc(res))
+		return fmt.Errorf("WS281x: error ws2811.wait: %d (%v)", res, StatusDesc(res))
 
 	}
 	return nil
@@ -156,7 +163,7 @@ func (ws2811 *WS2811) Fini() {
 }
 
 // SetupExit captures Interrupt and SIGTERM signals to handle program exit 
-func (ws2811 *WS2811) SetupExit(channel int, ledCount int) {
+func (ws2811 *WS2811) SetupExit(channel int, ledCount int, clear bool) {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
 
@@ -164,7 +171,11 @@ func (ws2811 *WS2811) SetupExit(channel int, ledCount int) {
 		for range signalChan {
 			fmt.Println("")
 			fmt.Println("WS281x: Exiting...")
-			ws2811.Clear(channel, ledCount)
+			if (clear) {
+				fmt.Println("WS281x: Clearing LEDs")
+				ws2811.ClearAll(channel, ledCount)
+				ws2811.Render()
+			}
 			ws2811.Fini()
 			os.Exit(1)
 		}
@@ -176,12 +187,9 @@ func (ws2811 *WS2811) SetAll(channel int, ledCount int, color uint32) {
 	for led := 0; led < ledCount; led++ {
 		ws2811.Leds(channel)[led] = color
 	}
-	ws2811.Wait()
-	ws2811.Render()
 }
 
 // Clears all the leds (sets to 0x0000000) for matrix
-func (ws2811 *WS2811) Clear(channel int, ledCount int) {
-	fmt.Println("WS281x: Clearing LEDs")
+func (ws2811 *WS2811) ClearAll(channel int, ledCount int) {
 	ws2811.SetAll(channel, ledCount, 0)
 }

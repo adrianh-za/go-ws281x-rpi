@@ -14,11 +14,11 @@ const (
 	// Raspberry Pi.
 	DefaultGpioPin = 18
 	// DefaultLedCount is the default number of LEDs on the stripe.
-	DefaultLedCount = 16
+	DefaultLedCount = 32
 	// DefaultBrightness is the default maximum brightness of the LEDs. The brightness value can be between 0 and 255.
 	// If the brightness is too low, the LEDs remain dark. If the brightness is too high, the system needs too much
 	// current.
-	DefaultBrightness = 64 // Safe value between 0 and 255.
+	DefaultBrightness = 96 // Safe value between 0 and 255.
 )
 
 const (
@@ -80,6 +80,10 @@ type ChannelOption struct {
 	BShift int
 	// Gamma is the gamma correction table
 	Gamma []byte
+	// Must capture Interrupt and SIGTERM signals to handle program exit
+	CaptureExit bool
+	// Must the LEDs be cleared on exit
+	ClearOnExit bool
 }
 
 // Option is the list of device options
@@ -100,12 +104,14 @@ var DefaultOptions = Option{
 	DmaNum:    DefaultDmaNum,
 	Channels: []ChannelOption{
 		{
-			GpioPin:    DefaultGpioPin,
-			LedCount:   DefaultLedCount,
-			Brightness: DefaultBrightness,
-			StripeType: WS2812Strip,
-			Invert:     false,
-			Gamma:      gamma8,
+			GpioPin:     DefaultGpioPin,
+			LedCount:    DefaultLedCount,
+			Brightness:  DefaultBrightness,
+			StripeType:  WS2812Strip,
+			Invert:      false,
+			Gamma:       nil,
+			CaptureExit: true,
+			ClearOnExit: true,
 		},
 	},
 }
