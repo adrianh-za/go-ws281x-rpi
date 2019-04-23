@@ -8,20 +8,20 @@ import (
 )
 
 const (
-	ledCount int = 32
-	ledBrightness int = 96
+	ledBrightness int = 48
 	ledChannel int = 0
+	ledRows int = 8
+	ledCols int = 8
 )
 
 func main() {
 	opt := ws2811.DefaultOptions
 	opt.Channels[ledChannel].Brightness = ledBrightness
-	opt.Channels[ledChannel].LedCount = ledCount
+	opt.Channels[ledChannel].LedCount = ledRows * ledCols
 	
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
 	device.Init()
-	device.SetupExit(ledChannel, ledCount)
 	println(err)
 
 	var hue = int64(0)
@@ -30,7 +30,8 @@ func main() {
 		var r, g, b = colorsys.Hsv2Rgb(float64(hue), 1.0, 1.0)
 		var hex = colorsys.RGBToHex(r, g, b)
 		fmt.Println("RGB: ", r, g, b,  "Hue: ", hue, " Hex: ", hex)
-		device.SetAll(ledChannel, ledCount, hex)
+		device.SetAll(ledChannel, opt.Channels[ledChannel].LedCount, hex)
+		device.Render()
 		
 		time.Sleep(10 * time.Millisecond)
 		hue = (hue + 1) % 360

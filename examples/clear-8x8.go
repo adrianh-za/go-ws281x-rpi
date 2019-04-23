@@ -5,20 +5,21 @@ import (
 )
 
 const (
-	ledCount int = 32
-	ledBrightness int = 96
+	ledBrightness int = 64
 	ledChannel int = 0
+	ledRows int = 8
+	ledCols int = 8
 )
 
 func main() {
 	opt := ws2811.DefaultOptions
 	opt.Channels[ledChannel].Brightness = ledBrightness
-	opt.Channels[ledChannel].LedCount = ledCount
+	opt.Channels[ledChannel].LedCount = ledRows * ledCols
 	
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
 	device.Init()
-	defer device.Fini()
 	println(err)
-	device.Clear(ledChannel, ledCount)
+	device.ClearAll(ledChannel, opt.Channels[ledChannel].LedCount)
+	device.Wait()
 }

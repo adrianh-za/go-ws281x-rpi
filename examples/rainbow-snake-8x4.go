@@ -8,48 +8,43 @@ import (
 )
 
 const (
-	ledCount int = 32
-	ledBrightness int = 96
+	ledBrightness int = 48
 	ledChannel int = 0
+	ledRows int = 4
+	ledCols int = 8
 )
 
 func main() {
+	//Setup LED options
 	opt := ws2811.DefaultOptions
 	opt.Channels[ledChannel].Brightness = ledBrightness
-	opt.Channels[ledChannel].LedCount = ledCount
+	opt.Channels[ledChannel].LedCount = ledRows * ledCols
 	
+	//Setup LEDs
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
 	device.Init()
-	device.SetupExit(ledChannel, ledCount)
 	println(err)
 
+	//Setup the vars
 	var hue = int64(0)
-	var hueStep = int64(360 / ledCount)
+	var hueStep = int64(360 / opt.Channels[ledChannel].LedCount)
 
 	for {
-		
-		for pixelCount := 0; pixelCount < ledCount; pixelCount++ {
+		//Set each pixel to correct colour
+		for pixelCount := 0; pixelCount < opt.Channels[ledChannel].LedCount; pixelCount++ {
 			var pixelHue = (hue + (hueStep * int64(pixelCount))) % 360
 			var r, g, b = colorsys.Hsv2Rgb(float64(pixelHue), 1.0, 1.0)
-			var hex = rgbToColor(r, g, b)
+			var hex = colorsys.RGBToHex(r, g, b)
 			fmt.Println("Hue: ", hue, " Hex: ", hex)
 			device.Leds(ledChannel)[pixelCount] = hex
 		}
 
-		device.Wait()
+		//Paint the LEDs
 		device.Render()
+
+		//Sleep a bit and increment hue
 		time.Sleep(40 * time.Millisecond)
 		hue = (hue + hueStep) % 360	//Step the HUE over one step
 	}
-}
-
-func rgbToColor(r uint32, g uint32, b uint32) uint32 {
-	//return ((r >> 8) & 0xff) << 16 + ((g >> 8) & 0xff) <<8 + ((b >> 8) & 0xff)
-	//return ((r & 0xff) << 16) + ((g & 0xff) << 8) + (b & 0xff);
-	return ((1 << 24) + (r << 16) + (g << 8) + b)
-}
-
-func rgbaToColor(r uint32, g uint32, b uint32, a uint32) uint32 {
-	return ((r & 0xff) << 24) + ((g & 0xff) << 16) + ((b & 0xff) << 8) + (a & 0xff);
 }
