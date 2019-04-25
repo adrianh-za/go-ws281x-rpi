@@ -1,14 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"time"
 	ws2811 "github.com/adrianh-za/ws281x-rpi"
 	"github.com/adrianh-za/utils-golang/colorsys"
+	"./utils"
 )
 
 const (
-	ledBrightness int = 48
+	ledBrightness int = 64
 	ledChannel int = 0
 	ledRows int = 8
 	ledCols int = 8
@@ -36,7 +36,7 @@ func main() {
 			var pixelHue = (hue + (hueStep * int64(pixelCount))) % 360
 			var r, g, b = colorsys.Hsv2Rgb(float64(pixelHue), 1.0, 1.0)
 			var hex = colorsys.RGBToHex(r, g, b)
-			fmt.Println("Hue: ", hue, " Hex: ", hex)
+			utils.VerbosePrintln("Hue: ", hue, " Hex: ", hex)
 			device.Leds(ledChannel)[pixelCount] = hex
 		}
 

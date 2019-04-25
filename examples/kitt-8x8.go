@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"time"
-
 	"github.com/adrianh-za/utils-golang/colorsys"
 	ws2811 "github.com/adrianh-za/ws281x-rpi"
+	"./utils"
 )
 
 const (
@@ -28,9 +27,9 @@ func main() {
 	println(err)
 
 	//Do some LED processing from here onwards
-	var ledPositions = GetLedOuterBoundry(ledRows, ledCols, false)
+	var ledPositions = utils.GetLedOuterBoundry(ledRows, ledCols, false)
 	var ledPositionsLength = len(ledPositions) //Just for performance, store the var
-	fmt.Println(ledPositions)
+	utils.VerbosePrintln(ledPositions)
 
 	for {
 		for count := 0; count < ledPositionsLength; count++ {
@@ -38,7 +37,7 @@ func main() {
 			var led2 = ledPositions[((ledPositionsLength+count)-1)%ledPositionsLength]
 			var led3 = ledPositions[((ledPositionsLength+count)-2)%ledPositionsLength]
 			var led4 = ledPositions[((ledPositionsLength+count)-3)%ledPositionsLength]
-			fmt.Println("Count: ", count, " LEDs: ", led1, led2, led3, led4)
+			utils.VerbosePrintln("Count: ", count, " LEDs: ", led1, led2, led3, led4)
 
 			//Clear all LEDs
 			device.ClearAll(ledChannel, opt.Channels[ledChannel].LedCount)
@@ -53,37 +52,5 @@ func main() {
 			device.Render()
 			time.Sleep(100 * time.Millisecond)
 		}
-	}
-}
-
-func GetLedOuterBoundry(rows int, columns int, reverse bool) []int {
-	var totalLEDs = rows * columns
-	var ledIndexes = make([]int, 0)
-
-	//First row
-	for count := 0; count < columns; count++ {
-		ledIndexes = append(ledIndexes, count)
-	}
-	//First column
-	for count := 2; count < rows; count++ {
-		ledIndexes = append(ledIndexes, (count*columns)-1)
-	}
-	//Second row (opposite direction)
-	for count := totalLEDs; count > (totalLEDs - columns); count-- {
-		ledIndexes = append(ledIndexes, count-1)
-	}
-	//Second column (opposite direction)
-	for count := totalLEDs - (columns * 2); count > 0; count = count - columns {
-		ledIndexes = append(ledIndexes, count)
-	}
-
-	//Return the array of INT, reverse is specified
-	if !reverse {
-		return ledIndexes
-	} else {
-		for i, j := 0, len(ledIndexes)-1; i < j; i, j = i+1, j-1 {
-			ledIndexes[i], ledIndexes[j] = ledIndexes[j], ledIndexes[i]
-		}
-		return ledIndexes
 	}
 }
