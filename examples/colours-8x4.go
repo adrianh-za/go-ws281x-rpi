@@ -23,9 +23,13 @@ func main() {
 	//Setup LEDs
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
+	if (err != nil) {
+		println(err)
+		return
+	}
 	device.Init()
-	println(err)
-
+	device.SetupExit(ledChannel, true)
+	
 	//Do some LED processing from here onwards
 	var hue = int64(0)
 	for {
@@ -35,8 +39,8 @@ func main() {
 		utils.VerbosePrintln("RGB: ", r, g, b,  "Hue: ", hue, " Hex: ", hex)
 		
 		//Set LEDs
-		device.SetAll(ledChannel, opt.Channels[ledChannel].LedCount, hex)
-		device.Render()
+		device.SetAll(ledChannel, hex)
+		device.WaitRender()
 		
 		//Sleep and increment the HUE
 		time.Sleep(20 * time.Millisecond)

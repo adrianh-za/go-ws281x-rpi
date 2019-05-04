@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	ledBrightness int = 48
+	ledBrightness int = 64
 	ledChannel int = 0
 	ledRows int = 8
 	ledCols int = 8
@@ -19,13 +19,17 @@ func main() {
 	opt := ws2811.DefaultOptions
 	opt.Channels[ledChannel].Brightness = ledBrightness
 	opt.Channels[ledChannel].LedCount = ledRows * ledCols
-
+	
 	//Setup LEDs
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
+	if (err != nil) {
+		println(err)
+		return
+	}
 	device.Init()
-	println(err)
-
+	device.SetupExit(ledChannel, true)
+	
 	//Do some LED processing from here onwards
 	var hue = int64(0)
 	for {
@@ -35,11 +39,11 @@ func main() {
 		utils.VerbosePrintln("RGB: ", r, g, b,  "Hue: ", hue, " Hex: ", hex)
 		
 		//Set LEDs
-		device.SetAll(ledChannel, opt.Channels[ledChannel].LedCount, hex)
-		device.Render()
+		device.SetAll(ledChannel, hex)
+		device.WaitRender()
 		
 		//Sleep and increment the HUE
-		time.Sleep(10 * time.Millisecond)
+		time.Sleep(20 * time.Millisecond)
 		hue = (hue + 1) % 360
 	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	ws2811 "github.com/adrianh-za/ws281x-rpi"
+	"./utils"
 )
 
 const (
@@ -20,10 +21,15 @@ func main() {
 	//Setup LEDs
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
+	if (err != nil) {
+		println(err)
+		return
+	}
 	device.Init()
-	println(err)
+	utils.VerbosePrintln("LEDs initialized")
 
 	//Clear the LED hat
-	device.ClearAll(ledChannel, opt.Channels[ledChannel].LedCount)
-	device.Wait()
+	device.ClearAll(ledChannel)
+	device.WaitRender()
+	utils.VerbosePrintln("LEDs cleared")
 }

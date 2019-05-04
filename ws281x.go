@@ -33,9 +33,6 @@ import "C"
 import (
 	"errors"
 	"fmt"
-	"os"
-	"os/signal"
-	"syscall"
 	"unsafe"
 )
 
@@ -97,11 +94,6 @@ func MakeWS2811(opt *Option) (ws2811 *WS2811, err error) {
 			ws2811.dev.channel[i].gamma = m
 			C.memcpy(unsafe.Pointer(m), unsafe.Pointer(&cOpt.Gamma[0]), C.size_t(256)) // nolint: gas
 		}
-
-		//Must the exit be captured and handled, and must the matrix be cleared
-		if cOpt.CaptureExit {
-			ws2811.SetupExit(i, cOpt.LedCount, cOpt.ClearOnExit)
-		}
 	}
 	return ws2811, err
 }
@@ -160,37 +152,4 @@ func (ws2811 *WS2811) Fini() {
 	// already releases this data.
 	C.free(unsafe.Pointer(ws2811.dev)) // nolint: gas
 	ws2811.initialized = false
-	fmt.Println("WS281x: Finalised")
-}
-
-// SetupExit captures Interrupt and SIGTERM signals to handle program exit 
-func (ws2811 *WS2811) SetupExit(channel int, ledCount int, clear bool) {
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		for range signalChan {
-			fmt.Println("")
-			fmt.Println("WS281x: Exiting...")
-			if (clear) {
-				fmt.Println("WS281x: Clearing LEDs")
-				ws2811.ClearAll(channel, ledCount)
-				ws2811.Render()
-			}
-			ws2811.Fini()
-			os.Exit(1)
-		}
-	}()
-}
-
-// Sets all the leds for matrix to the specified color
-func (ws2811 *WS2811) SetAll(channel int, ledCount int, color uint32) {
-	for led := 0; led < ledCount; led++ {
-		ws2811.Leds(channel)[led] = color
-	}
-}
-
-// Clears all the leds (sets to 0x0000000) for matrix
-func (ws2811 *WS2811) ClearAll(channel int, ledCount int) {
-	ws2811.SetAll(channel, ledCount, 0)
 }

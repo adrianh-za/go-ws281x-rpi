@@ -21,7 +21,12 @@
 
 package ws2811
 
-import "github.com/pkg/errors"
+import (
+	"os"
+	"os/signal"
+	"syscall"
+	"github.com/pkg/errors"
+)
 
 const (
 	// DefaultDmaNum is the default DMA number. Usually, this is 5 ob the Raspberry Pi (NOW CHANGE TO 10)
@@ -40,15 +45,6 @@ const (
 	// If the brightness is too low, the LEDs remain dark. If the brightness is too high, the system needs too much
 	// current.
 	DefaultBrightness = 96 // Safe value between 0 and 255.
-)
-
-const (
-	// HwVerTypeUnknown represents unknown hardware
-	HwVerTypeUnknown = 0
-	// HwVerTypePi1 represents the Raspberry Pi 1
-	HwVerTypePi1 = 1
-	// HwVerTypePi2 represents the Raspberry Pi 2
-	HwVerTypePi2 = 2
 )
 
 // StateDesc is a map from a return state to its string description.
@@ -131,8 +127,6 @@ var DefaultOptions = Option{
 			StripeType:  WS2812Strip,
 			Invert:      false,
 			Gamma:       nil,
-			CaptureExit: true,
-			ClearOnExit: true,
 		},
 	},
 }
@@ -164,6 +158,46 @@ func StatusDesc(code int) string {
 		return desc
 	}
 	return "Unknown"
+}
+
+// SetupExit captures Interrupt and SIGTERM signals to handle program exit 
+func (ws2811 *WS2811) SetupExit(channel int, clear bool) {
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		for range signalChan {
+			if (clear) {
+				ws2811.ClearAll(channel)
+				ws2811.Render()
+			}
+			ws2811.Fini()
+			os.Exit(1)
+		}
+	}()
+}
+
+// SetAll sets all the leds for matrix to the specified color
+func (ws2811 *WS2811) SetAll(channel int, color uint32) {
+	for led := 0; led < len(ws2811.Leds(channel)); led++ {	
+		ws2811.Leds(channel)[led] = color
+	}
+}
+
+// ClearAll clears all the leds (sets to 0x0000000) for matrix
+func (ws2811 *WS2811) ClearAll(channel int) {
+	ws2811.SetAll(channel, 0)
+}
+
+// WaitRender first waits and then renders
+func (ws2811 *WS2811) WaitRender() (error) {
+	if err := ws2811.Wait(); err != nil {
+		return errors.WithMessage(err, "Error waiting LEDs")
+	}
+	if err := ws2811.Render(); err != nil {
+		return errors.WithMessage(err, "Error rendering LEDs")
+	}
+	return nil
 }
 
 var gamma8 = []byte{

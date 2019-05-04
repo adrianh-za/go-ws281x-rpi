@@ -23,8 +23,12 @@ func main() {
 	//Setup LEDs
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
+	if (err != nil) {
+		println(err)
+		return
+	}
 	device.Init()
-	println(err)
+	device.SetupExit(ledChannel, true)
 
 	var hue = int64(0)
 	var hueStep = int64(360 / 8)
@@ -44,7 +48,7 @@ func main() {
 		}
 		
 		//Paint the frame
-		device.Render()
+		device.WaitRender()
 
 		//Delay and increase the hue
 		time.Sleep(30 * time.Millisecond)

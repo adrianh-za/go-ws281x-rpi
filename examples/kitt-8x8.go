@@ -23,8 +23,12 @@ func main() {
 	//Setup LEDs
 	var device *ws2811.WS2811
 	device, err := ws2811.MakeWS2811(&opt)
+	if (err != nil) {
+		println(err)
+		return
+	}
 	device.Init()
-	println(err)
+	device.SetupExit(ledChannel, true)
 
 	//Do some LED processing from here onwards
 	var ledPositions = utils.GetLedOuterBoundry(ledRows, ledCols, false)
@@ -40,7 +44,7 @@ func main() {
 			utils.VerbosePrintln("Count: ", count, " LEDs: ", led1, led2, led3, led4)
 
 			//Clear all LEDs
-			device.ClearAll(ledChannel, opt.Channels[ledChannel].LedCount)
+			device.ClearAll(ledChannel)
 
 			//Set the LED colors
 			device.Leds(ledChannel)[led1] = colorsys.RGBToHex(255, 0, 0)
@@ -49,7 +53,7 @@ func main() {
 			device.Leds(ledChannel)[led4] = colorsys.RGBToHex(8, 0, 0)
 
 			//Paint the LEDs
-			device.Render()
+			device.WaitRender()
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
