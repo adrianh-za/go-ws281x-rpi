@@ -3,9 +3,9 @@ Library written in Go to allow controlling of the WS281x LED strips on a Raspber
 
 ## Acknowledgements ##
 
-Utilises the WS281x library written by Jeremy Garff
+Utilises the WS281x library written by <b><a href="https://github.com/jgarff" target="_blank">Jeremy Garff</a></b>
 
-Borrows heavily from the work done by Jacques Supcik <jacques@supcik.net>
+Borrows heavily from the work done by <b><a href="https://github.com/supcik" target="_blank">Jacques Supcik</a></b>
 
 ## Gits ##
 
