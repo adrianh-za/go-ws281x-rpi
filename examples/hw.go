@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	ws2811 "github.com/adrianh-za/ws281x-rpi"
+	ws2811 "github.com/adrianh-za/go-ws281x"
 )
 
 func main() {

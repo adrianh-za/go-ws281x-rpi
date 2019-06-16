@@ -2,8 +2,8 @@ package main
 
 import (
 	"time"
-	ws2811 "github.com/adrianh-za/ws281x-rpi"
-	"github.com/adrianh-za/utils-golang/colorsys"
+	ws2811 "github.com/adrianh-za/go-ws281x"
+	"github.com/adrianh-za/go-utils/colorsys"
 	"./utils"
 )
 
