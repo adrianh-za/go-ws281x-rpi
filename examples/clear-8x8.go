@@ -1,7 +1,7 @@
 package main
 
 import (
-	ws2811 "github.com/adrianh-za/go-ws281x"
+	ws2811 "github.com/adrianh-za/go-ws281x-rpi"
 	"./utils"
 )
 

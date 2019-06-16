@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/adrianh-za/go-utils/colorsys"
-	ws2811 "github.com/adrianh-za/go-ws281x"
+	ws2811 "github.com/adrianh-za/go-ws281x-rpi"
 )
 
 const (
