@@ -37,27 +37,31 @@ First, grab the C library
 
 5.  `sudo reboot`
 
-6.  `git clone https://github.com/jgarff/rpi_ws281x`  (the C library that drives the LEDs)
+6. `go get github.com/rpi-ws281x/rpi-ws281x-go` so that the `go/src/github.com` directory is created.
 
-7.  `sudo nano /etc/modprobe.d/snd-blacklist.conf` (to disable audio due to PCM)
+    => An error will likely occur if `https://github.com/jgarff/rpi_ws281x` is not installed.
 
-8.  browse to this github repo and type `scons` to compile library
+7.  browse to `go/src/github.com` and then create the `jgarff` directory with  `mkdir jgarff` if it doesn't exist.  
 
-9.  copy *.h files to /usr/local/include
+8.  browse to `go/src/github.com/jgarff` and type  `git clone https://github.com/jgarff/rpi_ws281x`  (the C library that drives the LEDs)
+
+9.  browse to  `go/src/github.com/jgarff/rpi_ws281x` github repo and type `scons` to compile library
+
+10.  copy *.h files to /usr/local/include
 
     `sudo cp *.h /usr/local/include`
 
-10. copy *.a files to /usr/local/lib
+11. copy *.a files to /usr/local/lib
 
     `sudo cp *.a /usr/local/lib`
-
-11. `go get github.com/rpi-ws281x/rpi-ws281x-go`
-
-12. `go get github.com/adrianh-za/go-ws281x-rpi`
+    
+12. `go get github.com/rpi-ws281x/rpi-ws281x-go`
+    `go get github.com/adrianh-za/go-ws281x-rpi`
+    `go get github.com/adrianh-za/go-utils/colorsys`
 
 13. browse to $/go/src/github.com/adrianh-za/go-ws281x-rpi/examples
 
-14. `sudo -E go run [filename].go`
+14. `sudo -E go run [filename].go`  (check filenames below)
 
 15. ctrl-c to quit
 
