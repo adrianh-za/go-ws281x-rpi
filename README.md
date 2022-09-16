@@ -47,7 +47,7 @@ First, grab the C library
 
 9.  browse to  `go/src/github.com/jgarff/rpi_ws281x` github repo and type `scons` to compile library
 
-10.  copy *.h files to /usr/local/include
+10. copy *.h files to /usr/local/include
 
     `sudo cp *.h /usr/local/include`
 
